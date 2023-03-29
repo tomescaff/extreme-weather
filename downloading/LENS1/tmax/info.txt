@@ -1,0 +1,13 @@
+This directory stores the scripts used for downloading LENS1 data.
+
+TREFHTMX : Air temperature at reference height (2 m a.g.l.) - Daily maximum value
+CR : Control run
+FU : Future (>2005)
+HIST: Historical (<=2005)
+
+The following commands were executed to download LENS1 data:
+
+$ conda activate paper
+$ nohup python ucar.cgd.ccsm4.cesmLE.atm.proc.daily_ave.TREFHTMX-CR.py &
+$ nohup python ucar.cgd.ccsm4.cesmLE.atm.proc.daily_ave.TREFHTMX-HIST.py > download_info_HIST.out 2> download_info_HIST.err &
+$ nohup python ucar.cgd.ccsm4.cesmLE.atm.proc.daily_ave.TREFHTMX-FU.py > download_info_FU.out 2> download_info_FU.err &
