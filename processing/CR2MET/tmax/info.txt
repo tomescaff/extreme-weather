@@ -1,0 +1,7 @@
+This directory stores the scripts for processing CR2MET data
+
+The following command were executed:
+
+$ nohup bash compute_vars_CR2MET_ERA5.sh > compute_info_ERA5.out 2> compute_info_ERA5.err &
+$ nohup bash compute_vars_CR2MET_ERA5T.sh > compute_info_ERA5T.out 2> compute_info_ERA5T.err &
+$ bash finalize.sh
