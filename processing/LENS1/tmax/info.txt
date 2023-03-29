@@ -1,0 +1,40 @@
+This directory stores the scripts for processing LENS1 data
+
+TREFHTMX : Air temperature at reference height (2 m a.g.l.) - Daily maximum value
+CR : Control run
+FU : Future (>2005)
+HIST: Historical (<=2005)
+EX: Extended (1920-2100)
+
+############################################################
+Notes: 
+
+1) In LENS1 data, the value assigned to day YYYY-01-02 is calculated using the period [YYYY-01-01 00:00:00, YYYY-01-02 00:00:00), and so on.
+For this reason, summers (DJF) span from 12-02 to 03-01.
+
+2) CR files start on 01-02 and end in 01-01. For example, the file:
+
+b.e11.B1850C5CN.f09_g16.005.cam.h1.TREFHTMX.05000101-05991231.nc
+
+starts in 500-01-02 and ends in 600-01-01. The only EXCEPTION is:
+
+b.e11.B1850C5CN.f09_g16.005.cam.h1.TREFHTMX.04020101-04991231.nc
+
+which ends at 499-12-31. For this reason the CR-merged file starts on 500-12-02 and not in 402-12-02.
+############################################################
+
+The following command were executed:
+
+$ nohup bash reduce_latlonvartime_CR.sh > reduce_info_CR.out 2> reduce_info_CR.err &
+$ nohup bash merge_CR.sh > merge_info_CR.out 2> merge_info_CR.err &
+$ nohup bash compute_vars_CR.sh > compute_info_CR.out 2> compute_info_CR.err &
+
+$ nohup bash reduce_latlonvartime_HIST.sh > reduce_info_HIST.out 2> reduce_info_HIST.err &
+$ nohup bash reduce_latlonvartime_FU.sh > reduce_info_FU.out 2> reduce_info_FU.err &
+
+$ nohup bash merge_FU.sh > merge_info_FU.out 2> merge_info_FU.err &
+$ nohup bash merge_EX.sh > merge_info_EX.out 2> merge_info_EX.err &
+$ nohup bash compute_vars_EX.sh > compute_info_EX.out 2> compute_info_EX.err &
+
+$ bash finalize_EX.sh
+$ bash finalize_CR.sh
