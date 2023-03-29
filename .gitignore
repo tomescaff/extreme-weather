@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 
 # temporary files
-.out
-.err
+*.out
+*.err
 
