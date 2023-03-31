@@ -38,3 +38,5 @@ $ nohup bash compute_vars_EX.sh > compute_info_EX.out 2> compute_info_EX.err &
 
 $ bash finalize_EX.sh
 $ bash finalize_CR.sh
+$ bash remap.sh
+$ bash fldstat.sh
