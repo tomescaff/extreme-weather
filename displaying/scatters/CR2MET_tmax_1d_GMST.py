@@ -22,8 +22,10 @@ init_params = [37, 4, 2, 0.0]
 mu0, sigma, alpha, eta = pmath.mle_gev_2d(y.values, x.values, init_params)
 
 mu = mu0 + alpha*x
-mu_plus_1sigma = mu + sigma
-mu_plus_2sigma = mu + 2*sigma
+mean = gev.mean(eta, mu, sigma)
+std = gev.std(eta, mu, sigma)
+mean_plus_1std = mean + std
+mean_plus_2std = mean + 2*std
 val_tau_10 = gev.isf(1/10, eta, mu, sigma)
 val_tau_100 = gev.isf(1/100, eta, mu, sigma)
 
@@ -48,9 +50,9 @@ for year in [2017, 2019, 2023]:
     plt.text(x.sel(time=f'{year-1}')+0.01,
              y.sel(time=f'{year}'), f'{year}', fontsize=7)
 
-plt.plot(x, mu, c='#FF2E63', lw=1.5, label='Mean')
-plt.plot(x, mu_plus_1sigma, c='#FF2E63', lw=0.5)
-plt.plot(x, mu_plus_2sigma, c='#FF2E63', lw=0.5)
+plt.plot(x, mean, c='#FF2E63', lw=1.5, label='Mean')
+plt.plot(x, mean_plus_1std, c='#FF2E63', lw=0.5)
+plt.plot(x, mean_plus_2std, c='#FF2E63', lw=0.5)
 plt.plot(x, val_tau_100, c='#FF9A00', lw=1.5, label='100-year event')
 plt.plot(x, val_tau_10, c='#FF9A00', lw=1.5, ls='--', label='10-year event')
 plt.ylim([35, 43])
