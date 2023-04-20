@@ -7,9 +7,26 @@ sys.path.append('/home/tcarrasco/repo/extreme-weather/processing/')
 
 # import utilities.stations as stn  # noqa: E402
 
-import utilities.wildfires as wf  # noqa: E402
+import utilities.gmst as gmst  # noqa: E402
 
-df = wf.burned_area()
+ds_gmst = gmst.annual_global_HadCRUT()
+gmst_smooth = gmst.annual_global_HadCRUT_5year_smooth()
+
+gistemp = gmst.annual_global_GISTEMP()
+gistemp_smooth = gmst.annual_5year_smooth()
+
+mysmooth = gmst.annual_global_GISTEMP_5year_smooth()
+
+fig, axs = plt.subplots(1, 3, figsize=(12, 6))
+ds_gmst['anom'].plot(ax=axs[0])
+gmst_smooth.plot(ax=axs[0])
+
+gistemp.plot(ax=axs[1])
+gistemp_smooth.plot(ax=axs[1])
+
+mysmooth.plot(ax=axs[2])
+gistemp_smooth.plot(ax=axs[2])
+plt.show()
 
 
 # p1 = stn.tmax_1d_DJF('qn')
