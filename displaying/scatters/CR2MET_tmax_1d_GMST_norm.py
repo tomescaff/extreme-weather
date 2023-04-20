@@ -4,7 +4,7 @@ import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as font_manager
-from scipy.stats import genextreme as gev
+from scipy.stats import norm
 
 sys.path.append('/home/tcarrasco/repo/extreme-weather/processing/')
 
@@ -22,31 +22,28 @@ x = tglobal.sel(time=slice('1979', '2022'))
 y = tlocal.sel(time=slice('1980', '2023'))
 
 basedir = '/home/tcarrasco/result/data/best_estimate/'
-filename = 'MLE_CR2MET_tmax_1d_30_40S_best_estimate_gev_evaluation.csv'
+filename = 'MLE_CR2MET_tmax_1d_30_40S_best_estimate_norm_evaluation.csv'
 df = pd.read_csv(basedir + filename, index_col=0)
 mu0 = df.loc['Best estimate', 'mu0']
 sigma = df.loc['Best estimate', 'sigma']
 alpha = df.loc['Best estimate', 'alpha']
-eta = df.loc['Best estimate', 'eta']
-
 
 mu = mu0 + alpha*x
-mean = gev.mean(eta, mu, sigma)
-std = gev.std(eta, mu, sigma)
+mean = norm.mean(mu, sigma)
+std = norm.std(mu, sigma)
 mean_plus_1std = mean + std
 mean_plus_2std = mean + 2*std
-val_tau_10 = gev.isf(1/10, eta, mu, sigma)
-val_tau_100 = gev.isf(1/100, eta, mu, sigma)
+val_tau_10 = norm.isf(1/10, mu, sigma)
+val_tau_100 = norm.isf(1/100, mu, sigma)
 
 # CI of the mean
 nboot = 1000
 basedir = '/home/tcarrasco/result/data/bootstrap/'
-filename = f'MLE_CR2MET_tmax_1d_30_40S_nboot_{nboot}_gev_evaluation.nc'
+filename = f'MLE_CR2MET_tmax_1d_30_40S_nboot_{nboot}_norm_evaluation.nc'
 filepath = basedir + filename
 model = xr.open_dataset(filepath)
 boot_mu0 = model.mu0.values
 boot_alpha = model.alpha.values
-boot_eta = model.eta.values
 boot_sigma = model.sigma.values
 
 xx = np.linspace(x.min('time').values, x.max('time').values, 100)
@@ -57,7 +54,7 @@ for i, x_ in enumerate(xx):
     mu_arr = boot_mu0 + boot_alpha*x_
 
     for j, mu_ in enumerate(mu_arr):
-        mean_mat[j, i] = gev.mean(boot_eta[j], mu_, boot_sigma[j])
+        mean_mat[j, i] = norm.mean(mu_, boot_sigma[j])
 
 mean_inf, mean_sup = np.quantile(mean_mat, [0.025, 0.975], axis=0)
 
@@ -98,6 +95,6 @@ plt.xlabel('GMST anomaly (smoothed) (ºC)')
 plt.ylabel('Tmax [DJF, 30-40ºS] (ºC)')
 plt.legend(loc='upper center', ncol=3)
 plt.tight_layout()
-plt.savefig('/home/tcarrasco/result/images/png/CR2MET_tmax_1d_GMST.png',
+plt.savefig('/home/tcarrasco/result/images/png/CR2MET_tmax_1d_GMST_mean.png',
             dpi=300)
 plt.show()
