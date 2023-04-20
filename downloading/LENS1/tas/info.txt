@@ -1,0 +1,11 @@
+This directory stores the scripts used for downloading LENS1 data.
+
+TREFHT : Air temperature at reference height (2 m a.g.l.) - Monthly value
+CR : Control run
+FU : Future (>2005)
+HIST: Historical (<=2005)
+
+The following commands were executed to download LENS1 data:
+
+$ conda activate paper
+$ nohup python ucar.cgd.ccsm4.cesmLE.atm.proc.monthly_ave.TREFHT-CR.py > download_info_CR.out 2> download_info_CR.err &
