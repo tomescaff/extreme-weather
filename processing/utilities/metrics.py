@@ -201,7 +201,7 @@ def norm_best_estimate(tglobal, tlocal,
     return df
 
 
-def MLE_all_estimate(df, model, Tg_ac, Tg_pa=0.0, Tg_fu=2.0):
+def MLE_all_estimate_gev(df, model, Tg_ac, Tg_pa=0.0, Tg_fu=2.0, tau=100):
 
     mu0 = df.loc['Best estimate', 'mu0']
     sigma = df.loc['Best estimate', 'sigma']
@@ -212,7 +212,6 @@ def MLE_all_estimate(df, model, Tg_ac, Tg_pa=0.0, Tg_fu=2.0):
     mu_pa = mu0 + alpha*Tg_pa
     mu_fu = mu0 + alpha*Tg_fu
 
-    tau = 100
     ev_ac = gev.isf(1/tau, eta, mu_ac, sigma)
     ev_pa = gev.isf(1/tau, eta, mu_pa, sigma)
     ev_fu = gev.isf(1/tau, eta, mu_fu, sigma)
@@ -271,7 +270,6 @@ def MLE_all_estimate(df, model, Tg_ac, Tg_pa=0.0, Tg_fu=2.0):
         mu_pa = mu0 + alpha*Tg_pa
         mu_fu = mu0 + alpha*Tg_fu
 
-        tau = 100
         boot_ev_ac[i] = gev.isf(1/tau, eta, mu_ac, sigma)
         boot_ev_pa[i] = gev.isf(1/tau, eta, mu_pa, sigma)
         boot_ev_fu[i] = gev.isf(1/tau, eta, mu_fu, sigma)
@@ -335,7 +333,134 @@ def MLE_all_estimate(df, model, Tg_ac, Tg_pa=0.0, Tg_fu=2.0):
     return df
 
 
-def MLE_all_estimate_gev(df, model):
+def MLE_all_estimate_norm(df, model, Tg_ac, Tg_pa=0.0, Tg_fu=2.0, tau=100):
+
+    mu0 = df.loc['Best estimate', 'mu0']
+    sigma = df.loc['Best estimate', 'sigma']
+    alpha = df.loc['Best estimate', 'alpha']
+
+    mu_ac = mu0 + alpha*Tg_ac
+    mu_pa = mu0 + alpha*Tg_pa
+    mu_fu = mu0 + alpha*Tg_fu
+
+    ev_ac = norm.isf(1/tau, mu_ac, sigma)
+    ev_pa = norm.isf(1/tau, mu_pa, sigma)
+    ev_fu = norm.isf(1/tau, mu_fu, sigma)
+
+    deltaI_fu_ac = ev_fu - ev_ac
+    deltaI_ac_pa = ev_ac - ev_pa
+
+    tau_ac = 1/norm.sf(ev_ac, mu_ac, sigma)
+    tau_pa = 1/norm.sf(ev_ac, mu_pa, sigma)
+    tau_fu = 1/norm.sf(ev_ac, mu_fu, sigma)
+
+    PR_fu_ac = tau_ac/tau_fu
+    PR_ac_pa = tau_pa/tau_ac
+
+    df.loc['Best estimate', 'tau_ac'] = tau_ac
+    df.loc['Best estimate', 'tau_pa'] = tau_pa
+    df.loc['Best estimate', 'tau_fu'] = tau_fu
+
+    df.loc['Best estimate', 'ev_ac'] = ev_ac
+    df.loc['Best estimate', 'ev_pa'] = ev_pa
+    df.loc['Best estimate', 'ev_fu'] = ev_fu
+
+    df.loc['Best estimate', 'Delta fu-ac'] = deltaI_fu_ac
+    df.loc['Best estimate', 'Delta ac-pa'] = deltaI_ac_pa
+
+    df.loc['Best estimate', 'PR fu-ac'] = PR_fu_ac
+    df.loc['Best estimate', 'PR ac-pa'] = PR_ac_pa
+
+    nboot = model.iter.size
+    boot_mu0 = model.mu0.values
+    boot_sigma = model.sigma.values
+    boot_alpha = model.alpha.values
+
+    boot_tau_ac = np.zeros((nboot,))
+    boot_tau_pa = np.zeros((nboot,))
+    boot_tau_fu = np.zeros((nboot,))
+
+    boot_ev_ac = np.zeros((nboot,))
+    boot_ev_pa = np.zeros((nboot,))
+    boot_ev_fu = np.zeros((nboot,))
+
+    boot_deltaI_fu_ac = np.zeros((nboot,))
+    boot_deltaI_ac_pa = np.zeros((nboot,))
+
+    boot_PR_fu_ac = np.zeros((nboot,))
+    boot_PR_ac_pa = np.zeros((nboot,))
+
+    for i in range(nboot):
+        mu0 = boot_mu0[i]
+        sigma = boot_sigma[i]
+        alpha = boot_alpha[i]
+
+        mu_ac = mu0 + alpha*Tg_ac
+        mu_pa = mu0 + alpha*Tg_pa
+        mu_fu = mu0 + alpha*Tg_fu
+
+        boot_ev_ac[i] = norm.isf(1/tau, mu_ac, sigma)
+        boot_ev_pa[i] = norm.isf(1/tau, mu_pa, sigma)
+        boot_ev_fu[i] = norm.isf(1/tau, mu_fu, sigma)
+
+        boot_deltaI_fu_ac[i] = boot_ev_fu[i] - boot_ev_ac[i]
+        boot_deltaI_ac_pa[i] = boot_ev_ac[i] - boot_ev_pa[i]
+
+        boot_tau_ac[i] = 1/norm.sf(ev_ac, mu_ac, sigma)
+        boot_tau_pa[i] = 1/norm.sf(ev_ac, mu_pa, sigma)
+        boot_tau_fu[i] = 1/norm.sf(ev_ac, mu_fu, sigma)
+
+        boot_PR_fu_ac[i] = boot_tau_ac[i]/boot_tau_fu[i]
+        boot_PR_ac_pa[i] = boot_tau_pa[i]/boot_tau_ac[i]
+
+    # ###
+
+    df.loc['Lower estimate', 'mu0'] = np.quantile(boot_mu0, 0.025)
+    df.loc['Lower estimate', 'sigma'] = np.quantile(boot_sigma, 0.025)
+    df.loc['Lower estimate', 'alpha'] = np.quantile(boot_alpha, 0.025)
+
+    df.loc['Lower estimate', 'tau_ac'] = np.quantile(boot_tau_ac, 0.025)
+    df.loc['Lower estimate', 'tau_pa'] = np.quantile(boot_tau_pa, 0.025)
+    df.loc['Lower estimate', 'tau_fu'] = np.quantile(boot_tau_fu, 0.025)
+
+    df.loc['Lower estimate', 'ev_ac'] = np.quantile(boot_ev_ac, 0.025)
+    df.loc['Lower estimate', 'ev_pa'] = np.quantile(boot_ev_pa, 0.025)
+    df.loc['Lower estimate', 'ev_fu'] = np.quantile(boot_ev_fu, 0.025)
+
+    df.loc['Lower estimate',
+           'Delta fu-ac'] = np.quantile(boot_deltaI_fu_ac, 0.025)
+    df.loc['Lower estimate',
+           'Delta ac-pa'] = np.quantile(boot_deltaI_ac_pa, 0.025)
+
+    df.loc['Lower estimate', 'PR fu-ac'] = np.quantile(boot_PR_fu_ac, 0.025)
+    df.loc['Lower estimate', 'PR ac-pa'] = np.quantile(boot_PR_ac_pa, 0.025)
+
+    # ###
+
+    df.loc['Upper estimate', 'mu0'] = np.quantile(boot_mu0, 0.975)
+    df.loc['Upper estimate', 'sigma'] = np.quantile(boot_sigma, 0.975)
+    df.loc['Upper estimate', 'alpha'] = np.quantile(boot_alpha, 0.975)
+
+    df.loc['Upper estimate', 'tau_ac'] = np.quantile(boot_tau_ac, 0.975)
+    df.loc['Upper estimate', 'tau_pa'] = np.quantile(boot_tau_pa, 0.975)
+    df.loc['Upper estimate', 'tau_fu'] = np.quantile(boot_tau_fu, 0.975)
+
+    df.loc['Upper estimate', 'ev_ac'] = np.quantile(boot_ev_ac, 0.975)
+    df.loc['Upper estimate', 'ev_pa'] = np.quantile(boot_ev_pa, 0.975)
+    df.loc['Upper estimate', 'ev_fu'] = np.quantile(boot_ev_fu, 0.975)
+
+    df.loc['Upper estimate',
+           'Delta fu-ac'] = np.quantile(boot_deltaI_fu_ac, 0.975)
+    df.loc['Upper estimate',
+           'Delta ac-pa'] = np.quantile(boot_deltaI_ac_pa, 0.975)
+
+    df.loc['Upper estimate', 'PR fu-ac'] = np.quantile(boot_PR_fu_ac, 0.975)
+    df.loc['Upper estimate', 'PR ac-pa'] = np.quantile(boot_PR_ac_pa, 0.975)
+
+    return df
+
+
+def MLE_all_estimate_gev_no_eea_metrics(df, model):
 
     boot_mu0 = model.mu0.values
     boot_sigma = model.sigma.values
@@ -355,5 +480,26 @@ def MLE_all_estimate_gev(df, model):
     df.loc['Upper estimate', 'sigma'] = np.quantile(boot_sigma, 0.975)
     df.loc['Upper estimate', 'alpha'] = np.quantile(boot_alpha, 0.975)
     df.loc['Upper estimate', 'eta'] = np.quantile(boot_eta, 0.975)
+
+    return df
+
+
+def MLE_all_estimate_norm_no_eea_metrics(df, model):
+
+    boot_mu0 = model.mu0.values
+    boot_sigma = model.sigma.values
+    boot_alpha = model.alpha.values
+
+    # ###
+
+    df.loc['Lower estimate', 'mu0'] = np.quantile(boot_mu0, 0.025)
+    df.loc['Lower estimate', 'sigma'] = np.quantile(boot_sigma, 0.025)
+    df.loc['Lower estimate', 'alpha'] = np.quantile(boot_alpha, 0.025)
+
+    # ###
+
+    df.loc['Upper estimate', 'mu0'] = np.quantile(boot_mu0, 0.975)
+    df.loc['Upper estimate', 'sigma'] = np.quantile(boot_sigma, 0.975)
+    df.loc['Upper estimate', 'alpha'] = np.quantile(boot_alpha, 0.975)
 
     return df
