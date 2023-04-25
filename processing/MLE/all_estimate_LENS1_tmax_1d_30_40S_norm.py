@@ -13,7 +13,7 @@ df = pd.read_csv(filepath, index_col=0)
 
 # CI
 nboot = 1000
-tau = 1000
+tau = 10
 
 basedir = '/home/tcarrasco/result/data/bootstrap/'
 filename = f'MLE_LENS1_tmax_1d_30_40S_nboot_{nboot}_norm_evaluation.nc'
