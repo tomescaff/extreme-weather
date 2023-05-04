@@ -15,3 +15,13 @@ def lens1_tmax_1d_djf_30_40S_cr():
     filepath = basedir + filename
     da = xr.open_dataset(filepath)['tmax']
     return da
+
+
+def lens1_tmax_1d_djf_30_40S_40m_present():
+    da = lens1_tmax_1d_djf_30_40S_40m()
+    return da.sel(time=slice('2011', '2020'))
+
+
+def lens1_tmax_1d_djf_30_40S_40m_future():
+    da = lens1_tmax_1d_djf_30_40S_40m()
+    return da.sel(time=slice('2033', '2052'))

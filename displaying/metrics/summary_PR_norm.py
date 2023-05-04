@@ -32,23 +32,54 @@ filename = f'MLE_LENS1_tmax_1d_30_40S_nboot_{nboot}_norm_evaluation.nc'
 filepath = basedir + filename
 model = xr.open_dataset(filepath)
 
-lens1_hpr_be = np.zeros((n,))
-lens1_hpr_lo = np.zeros((n,))
-lens1_hpr_hi = np.zeros((n,))
+MLE_lens1_hpr_be = np.zeros((n,))
+MLE_lens1_hpr_lo = np.zeros((n,))
+MLE_lens1_hpr_hi = np.zeros((n,))
 
-lens1_fpr_be = np.zeros((n,))
-lens1_fpr_lo = np.zeros((n,))
-lens1_fpr_hi = np.zeros((n,))
+MLE_lens1_fpr_be = np.zeros((n,))
+MLE_lens1_fpr_lo = np.zeros((n,))
+MLE_lens1_fpr_hi = np.zeros((n,))
 
 for i, tau in enumerate(x):
     df = metrics.MLE_all_estimate_norm(df, model, Tg_ac=0.90, tau=tau)
-    lens1_hpr_be[i] = df.loc['Best estimate', 'PR ac-pa']
-    lens1_hpr_lo[i] = df.loc['Lower estimate', 'PR ac-pa']
-    lens1_hpr_hi[i] = df.loc['Upper estimate', 'PR ac-pa']
+    MLE_lens1_hpr_be[i] = df.loc['Best estimate', 'PR ac-pa']
+    MLE_lens1_hpr_lo[i] = df.loc['Lower estimate', 'PR ac-pa']
+    MLE_lens1_hpr_hi[i] = df.loc['Upper estimate', 'PR ac-pa']
 
-    lens1_fpr_be[i] = df.loc['Best estimate', 'PR fu-ac']
-    lens1_fpr_lo[i] = df.loc['Lower estimate', 'PR fu-ac']
-    lens1_fpr_hi[i] = df.loc['Upper estimate', 'PR fu-ac']
+    MLE_lens1_fpr_be[i] = df.loc['Best estimate', 'PR fu-ac']
+    MLE_lens1_fpr_lo[i] = df.loc['Lower estimate', 'PR fu-ac']
+    MLE_lens1_fpr_hi[i] = df.loc['Upper estimate', 'PR fu-ac']
+
+# obtain LENS1-DE parameters
+
+lens_pa = np.ravel(lens.lens1_tmax_1d_djf_30_40S_cr().values)
+lens_ac = np.ravel(lens.lens1_tmax_1d_djf_30_40S_40m_present().values)
+lens_fu = np.ravel(lens.lens1_tmax_1d_djf_30_40S_40m_future().values)
+
+nboot = 1000
+basedir = '/home/tcarrasco/result/data/bootstrap/'
+filename = f'DE_LENS1_tmax_1d_30_40S_nboot_{nboot}_norm_evaluation.nc'
+filepath = basedir + filename
+model = xr.open_dataset(filepath)
+
+DE_lens1_hpr_be = np.zeros((n,))
+DE_lens1_hpr_lo = np.zeros((n,))
+DE_lens1_hpr_hi = np.zeros((n,))
+
+DE_lens1_fpr_be = np.zeros((n,))
+DE_lens1_fpr_lo = np.zeros((n,))
+DE_lens1_fpr_hi = np.zeros((n,))
+
+for i, tau in enumerate(x):
+    df = metrics.DE_all_estimate_norm(lens_pa, lens_ac, lens_fu, model, tau)
+    DE_lens1_hpr_be[i] = df.loc['Best estimate', 'PR ac-pa']
+    DE_lens1_hpr_lo[i] = df.loc['Lower estimate', 'PR ac-pa']
+    DE_lens1_hpr_hi[i] = df.loc['Upper estimate', 'PR ac-pa']
+
+    DE_lens1_fpr_be[i] = df.loc['Best estimate', 'PR fu-ac']
+    DE_lens1_fpr_lo[i] = df.loc['Lower estimate', 'PR fu-ac']
+    DE_lens1_fpr_hi[i] = df.loc['Upper estimate', 'PR fu-ac']
+
 
 # Add every font at the specified location
 font_dir = ['/home/tcarrasco/result/fonts/Merriweather',
@@ -65,10 +96,29 @@ plt.rcParams['axes.spines.right'] = False
 fig, axs = plt.subplots(4, 2, figsize=(10, 10))
 
 ax = axs[0, 0]
-ax.fill_between(x, lens1_hpr_lo, lens1_hpr_hi, color='#0B2447', alpha=0.2)
-ax.plot(x, lens1_hpr_be, c='#0B2447', lw=2, label='Historical')
-ax.fill_between(x, lens1_fpr_lo, lens1_fpr_hi, color='#FC2947', alpha=0.2)
-ax.plot(x, lens1_fpr_be, c='#FC2947', lw=2, label='Future')
+ax.fill_between(x, MLE_lens1_hpr_lo, MLE_lens1_hpr_hi,
+                color='#0B2447', alpha=0.2)
+ax.plot(x, MLE_lens1_hpr_be, c='#0B2447', lw=2, label='Historical')
+ax.fill_between(x, MLE_lens1_fpr_lo, MLE_lens1_fpr_hi,
+                color='#FC2947', alpha=0.2)
+ax.plot(x, MLE_lens1_fpr_be, c='#FC2947', lw=2, label='Future')
+ax.grid(lw=0.2, ls='--', color='grey')
+ax.set_axisbelow(True)
+ax.legend(loc='center left', ncol=1)
+ax.set_xlabel('Return period (yr)')
+ax.set_ylabel('Probability ratio')
+ax.set_xscale('log')
+ax.text(11, 27.5, 'a) CESM1-LENS')
+ax.set_xlim([xmin, xmax])
+ax.set_ylim([1, 30])
+
+ax = axs[0, 1]
+ax.fill_between(x, DE_lens1_hpr_lo, DE_lens1_hpr_hi,
+                color='#0B2447', alpha=0.2)
+ax.plot(x, DE_lens1_hpr_be, c='#0B2447', lw=2, label='Historical')
+ax.fill_between(x, DE_lens1_fpr_lo, DE_lens1_fpr_hi,
+                color='#FC2947', alpha=0.2)
+ax.plot(x, DE_lens1_fpr_be, c='#FC2947', lw=2, label='Future')
 ax.grid(lw=0.2, ls='--', color='grey')
 ax.set_axisbelow(True)
 ax.legend(loc='center left', ncol=1)
