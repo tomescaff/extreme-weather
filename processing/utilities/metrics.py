@@ -40,6 +40,16 @@ def lens1_data_tmax_1d():
     return x, y
 
 
+def lens2_data_tmax_1d():
+    tglobal = gmst.annual_lens2_ensmean()
+    tlocal = lens.lens2_tmax_1d_djf_30_40S_100m()
+    tglobal = tglobal.sel(time=slice('1850', '2099'))
+    tlocal = tlocal.sel(time=slice('1851', '2100'))  # 40 ensemble members
+    x = np.tile(tglobal.values, tlocal.shape[1])
+    y = np.ravel(tlocal.values, order='F')
+    return x, y
+
+
 def lens1_data_tmax_1d_1980_2023():
     tglobal = gmst.annual_lens1_ensmean()
     tlocal = lens.lens1_tmax_1d_djf_30_40S_40m()
