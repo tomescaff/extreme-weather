@@ -12,8 +12,10 @@ cr2met = 'MLE_CR2MET_tmax_1d_30_40S_all_estimate_nboot_1000_norm_' +\
     'no2017_no2023_evaluation.csv'
 lens1 = 'MLE_LENS1_tmax_1d_30_40S_all_estimate_nboot_1000_' +\
     'tau_100_norm_evaluation.csv'
+lens2 = 'MLE_LENS2_tmax_1d_30_40S_all_estimate_nboot_1000_' +\
+    'tau_100_norm_evaluation.csv'
 
-filenames = [cr2met, lens1, cr2met, cr2met, cr2met]
+filenames = [cr2met, lens1, lens2, cr2met, cr2met]
 models = [pd.read_csv(join(basedir, filename), index_col=0)
           for filename in filenames]
 model_names = ['CR2MET', 'CESM1-LENS', 'CESM2-LENS', 'EC Earth 3', 'Model z']
@@ -36,7 +38,7 @@ varnames = ['mu0', 'sigma', 'alpha']
 xlabels = [r'Location parameter: $\mu_0$ (ºC)',
            r'Scale parameter: $\sigma$ (ºC)',
            r'Trend parameter: $\alpha$ (ºC/ºC)']
-xlims = [[34, 38], [0, 2], [-4, 4]]
+xlims = [[34.5, 38.5], [0, 2], [-4, 4]]
 for varname, ax, xlim, xlabel in zip(varnames, axs, xlims, xlabels):
     center = [m.loc['Best estimate', varname] for m in models]
     lower = [m.loc['Upper estimate', varname] for m in models]
@@ -47,11 +49,11 @@ for varname, ax, xlim, xlabel in zip(varnames, axs, xlims, xlabels):
     y_pos = np.arange(len(model_names))
     barlist = ax.barh(y_pos, width=width, left=lower,
                       height=0.4, align='center')
-    colors = ['#3EC1D3', 'grey', 'none', 'none', 'none']
+    colors = ['#3EC1D3', 'grey', 'grey', 'none', 'none']
     for bar, color in zip(barlist, colors):
         bar.set_color(color)
     plt.scatter(center, y_pos, s=100, marker='|', color=[
-                'k', 'k', 'none', 'none', 'none'], zorder=4)
+                'k', 'k', 'k', 'none', 'none'], zorder=4)
     plt.yticks(y_pos, model_names)
     plt.xlim(xlim)
     ax.set_axisbelow(True)

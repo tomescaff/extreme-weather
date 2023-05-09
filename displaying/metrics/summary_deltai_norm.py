@@ -81,6 +81,37 @@ for i, tau in enumerate(x):
     DE_lens1_fdi_lo[i] = df.loc['Lower estimate', 'Delta fu-ac']
     DE_lens1_fdi_hi[i] = df.loc['Upper estimate', 'Delta fu-ac']
 
+# obtain LENS2-MLE parameters
+
+basedir = '/home/tcarrasco/result/data/best_estimate/'
+filename = 'MLE_LENS2_tmax_1d_30_40S_best_estimate_norm_evaluation.csv'
+filepath = basedir + filename
+df = pd.read_csv(filepath, index_col=0)
+
+nboot = 1000
+basedir = '/home/tcarrasco/result/data/bootstrap/'
+filename = f'MLE_LENS2_tmax_1d_30_40S_nboot_{nboot}_norm_evaluation.nc'
+filepath = basedir + filename
+model = xr.open_dataset(filepath)
+
+MLE_lens2_hdi_be = np.zeros((n,))
+MLE_lens2_hdi_lo = np.zeros((n,))
+MLE_lens2_hdi_hi = np.zeros((n,))
+
+MLE_lens2_fdi_be = np.zeros((n,))
+MLE_lens2_fdi_lo = np.zeros((n,))
+MLE_lens2_fdi_hi = np.zeros((n,))
+
+for i, tau in enumerate(x):
+    df = metrics.MLE_all_estimate_norm(df, model, Tg_ac=1.10, tau=tau)
+    MLE_lens2_hdi_be[i] = df.loc['Best estimate', 'Delta ac-pa']
+    MLE_lens2_hdi_lo[i] = df.loc['Lower estimate', 'Delta ac-pa']
+    MLE_lens2_hdi_hi[i] = df.loc['Upper estimate', 'Delta ac-pa']
+
+    MLE_lens2_fdi_be[i] = df.loc['Best estimate', 'Delta fu-ac']
+    MLE_lens2_fdi_lo[i] = df.loc['Lower estimate', 'Delta fu-ac']
+    MLE_lens2_fdi_hi[i] = df.loc['Upper estimate', 'Delta fu-ac']
+
 # Add every font at the specified location
 font_dir = ['/home/tcarrasco/result/fonts/Merriweather',
             '/home/tcarrasco/result/fonts/arial']
@@ -130,6 +161,12 @@ ax.set_xlim([xmin, xmax])
 ax.set_ylim([0.5, 2])
 
 ax = axs[1, 0]
+ax.fill_between(x, MLE_lens2_hdi_lo, MLE_lens2_hdi_hi,
+                color='#0B2447', alpha=0.2)
+ax.plot(x, MLE_lens2_hdi_be, c='#0B2447', lw=2, label='Historical')
+ax.fill_between(x, MLE_lens2_fdi_lo, MLE_lens2_fdi_hi,
+                color='#FC2947', alpha=0.2)
+ax.plot(x, MLE_lens2_fdi_be, c='#FC2947', lw=2, label='Future')
 ax.grid(lw=0.2, ls='--', color='grey')
 ax.set_axisbelow(True)
 ax.set_xlabel('Return period (yr)')

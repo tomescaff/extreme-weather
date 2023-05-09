@@ -46,6 +46,22 @@ DE_lens1_sig_ac = sd_ac
 DE_lens1_sig_fu = sd_fu
 DE_lens1_ev_ac = df.loc['Best estimate', 'ev_ac']
 
+# obtain LENS2-MLE parameters
+
+# method 1
+basedir = '/home/tcarrasco/result/data/all_estimate/'
+filename = 'MLE_LENS2_tmax_1d_30_40S_all_estimate_' +\
+    'nboot_1000_tau_100_norm_evaluation.csv'
+df = pd.read_csv(basedir + filename, index_col=0)
+mu0, sigma, alpha, ev_ac = df.loc['Best estimate',
+                                  ['mu0', 'sigma', 'alpha', 'ev_ac']]
+MLE_lens2_mu_pa = mu0
+MLE_lens2_mu_ac = mu0 + alpha*1.1  # 1.1 ºC is the LENS2 2011-2020 GMST
+MLE_lens2_mu_fu = mu0 + alpha*2.0  # 2.0 ºC warmer world is future
+MLE_lens2_sigma = sigma
+MLE_lens2_ev_ac = ev_ac
+
+
 # plot
 
 # Add every font at the specified location
@@ -97,7 +113,7 @@ ax.axvline(MLE_lens1_ev_ac,
            c='fuchsia', lw=1, label='100-year event\n(factual climate)')
 ax.grid(lw=0.2, ls='--', color='grey')
 ax.set_axisbelow(True)
-ax.legend(ncol=1)
+# ax.legend(ncol=1)
 ax.set_xlabel('Highest Tx [DJF, central Chile] (ºC)')
 ax.set_ylabel('PDF')
 ax.text(30.5, 0.45, 'a) CESM1-LENS')
@@ -105,6 +121,16 @@ ax.set_xlim([xmin, xmax])
 ax.set_ylim([0, 0.5])
 
 ax = axs[1, 0]
+ax.plot(x, norm.pdf(x, MLE_lens2_mu_ac, MLE_lens2_sigma),
+        c='#159895', lw=2)
+ax.fill_between(x, 0, norm.pdf(x, MLE_lens2_mu_ac, MLE_lens2_sigma),
+                color='#159895', alpha=0.5, label='Factual')
+ax.plot(x, norm.pdf(x, MLE_lens2_mu_pa, MLE_lens2_sigma),
+        c='#0B2447', lw=1, ls='--', label='Counterfactual')
+ax.plot(x, norm.pdf(x, MLE_lens2_mu_fu, MLE_lens2_sigma),
+        c='#FC2947', lw=1, ls='--', label='Future')
+ax.axvline(MLE_lens2_ev_ac,
+           c='fuchsia', lw=1, label='100-year event\n(factual climate)')
 ax.grid(lw=0.2, ls='--', color='grey')
 ax.set_axisbelow(True)
 ax.set_xlabel('Highest Tx [DJF, central Chile] (ºC)')
