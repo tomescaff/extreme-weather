@@ -12,7 +12,7 @@ from utilities import gmst, lens  # noqa: E402
 from utilities import math as pmath  # noqa: E402
 
 tglobal_obs = gmst.annual_5year_smooth()
-tglobal_full= gmst.annual_lens1_ensmean()
+tglobal_full = gmst.annual_lens1_ensmean()
 tlocal = lens.lens1_tmax_1d_djf_30_40S_40m()
 
 tglobal = tglobal_full.sel(time=slice('1920', '2099'))

@@ -106,7 +106,7 @@ plt.scatter(x, y, s=20, marker='o', edgecolor='#222831',
 
 print(tglobal_cr.mean())
 print(Tpa)
-plt.scatter(tglobal_cr.values, tlocal_cr.values, s=20, marker='o', 
+plt.scatter(tglobal_cr.values, tlocal_cr.values, s=20, marker='o',
             edgecolor='#222831', facecolor='#EEEEEE', alpha=0.8)
 
 plt.plot(x_tot, mean, c='#FF2E63', lw=1.5, label='Mean')

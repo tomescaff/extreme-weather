@@ -8,6 +8,7 @@ from . import math as pmath
 from . import lens
 from . import cr2met
 from . import gmst
+from . import cmip6
 
 
 def obs_data_tmax_1d():
@@ -44,7 +45,27 @@ def lens2_data_tmax_1d():
     tglobal = gmst.annual_lens2_ensmean()
     tlocal = lens.lens2_tmax_1d_djf_30_40S_100m()
     tglobal = tglobal.sel(time=slice('1850', '2099'))
-    tlocal = tlocal.sel(time=slice('1851', '2100'))  # 40 ensemble members
+    tlocal = tlocal.sel(time=slice('1851', '2100'))  # 100 ensemble members
+    x = np.tile(tglobal.values, tlocal.shape[1])
+    y = np.ravel(tlocal.values, order='F')
+    return x, y
+
+
+def access_data_tmax_1d():
+    tglobal = cmip6.access_tas_annual_fldmean_ensmean()
+    tlocal = cmip6.access_tmax_1d_djf_30_40S_40m()  # 40 ensemble members
+    tglobal = tglobal.sel(time=slice('1850', '2013'))
+    tlocal = tlocal.sel(time=slice('1851', '2014'))
+    x = np.tile(tglobal.values, tlocal.shape[1])
+    y = np.ravel(tlocal.values, order='F')
+    return x, y
+
+
+def ecearth3_data_tmax_1d():
+    tglobal = cmip6.ecearth3_tas_annual_fldmean_ensmean()
+    tlocal = cmip6.ecearth3_tmax_1d_djf_30_40S_22m()  # 22 ensemble members
+    tglobal = tglobal.sel(time=slice('1850', '2013'))
+    tlocal = tlocal.sel(time=slice('1851', '2014'))
     x = np.tile(tglobal.values, tlocal.shape[1])
     y = np.ravel(tlocal.values, order='F')
     return x, y
@@ -382,9 +403,13 @@ def MLE_all_estimate_gev(df, model, Tg_ac, Tg_pa=0.0, Tg_fu=2.0, tau=100):
         boot_deltaI_fu_ac[i] = boot_ev_fu[i] - boot_ev_ac[i]
         boot_deltaI_ac_pa[i] = boot_ev_ac[i] - boot_ev_pa[i]
 
-        boot_tau_ac[i] = 1/gev.sf(ev_ac, eta, mu_ac, sigma)
-        boot_tau_pa[i] = 1/gev.sf(ev_ac, eta, mu_pa, sigma)
-        boot_tau_fu[i] = 1/gev.sf(ev_ac, eta, mu_fu, sigma)
+        # boot_tau_ac[i] = 1/gev.sf(ev_ac, eta, mu_ac, sigma)
+        # boot_tau_pa[i] = 1/gev.sf(ev_ac, eta, mu_pa, sigma)
+        # boot_tau_fu[i] = 1/gev.sf(ev_ac, eta, mu_fu, sigma)
+
+        boot_tau_ac[i] = 1/gev.sf(boot_ev_ac[i], eta, mu_ac, sigma)
+        boot_tau_pa[i] = 1/gev.sf(boot_ev_ac[i], eta, mu_pa, sigma)
+        boot_tau_fu[i] = 1/gev.sf(boot_ev_ac[i], eta, mu_fu, sigma)
 
         boot_PR_fu_ac[i] = boot_tau_ac[i]/boot_tau_fu[i]
         boot_PR_ac_pa[i] = boot_tau_pa[i]/boot_tau_ac[i]

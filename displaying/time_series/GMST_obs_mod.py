@@ -53,7 +53,7 @@ for i in range(lens1.size):
     if lens1[i:(i+20)].mean('time') >= 2.0:
         print(lens1[i:(i+20)])
         break
-    
+
 for i in range(lens2.size):
     if lens2[i:(i+20)].mean('time') >= 2.0:
         print(lens2[i:(i+20)])

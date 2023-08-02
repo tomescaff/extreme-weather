@@ -17,7 +17,7 @@ filename = 'MLE_CR2MET_tmax_1d_30_40S_nboot_' + \
 filepath = basedir + filename
 model.to_netcdf(filepath)
 
-# 
+#
 
 tglobal, tlocal = metrics.obs_data_tmax_1d_remove_year([2023])
 init_params = [37, 4, 2]
@@ -29,7 +29,7 @@ filename = 'MLE_CR2MET_tmax_1d_30_40S_nboot_' + \
 filepath = basedir + filename
 model.to_netcdf(filepath)
 
-# 
+#
 
 tglobal, tlocal = metrics.obs_data_tmax_1d_remove_year([2017, 2023])
 init_params = [36.5, 0.9, 1.2]

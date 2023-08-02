@@ -34,10 +34,79 @@ def cu_tmax_daily_1958_2023():
     return da
 
 
+def ch_tmax_daily_1960_2023():
+    basedir = "/home/tcarrasco/result/data/CH/"
+    filename = "tmax_diaria_bernardo_ohiggins_CR2_explorador.csv"
+    filepath = join(basedir, filename)
+    df = pd.read_csv(filepath, delimiter=",", decimal=".",
+                     parse_dates={'time': ['agno', ' mes', ' dia']})
+    df = df.rename({' valor': 'tmax'}, axis='columns')
+    df = df.set_index('time')
+    da = df['tmax'].to_xarray()
+    da = da.sel(time=slice('1960-01-01', None))
+    month = da.time.dt.month
+    day = da.time.dt.day
+    da = xr.where((month == 2) & (day == 29), np.nan, da)
+    da = da.dropna(dim="time", how="any")
+    return da
+
+
+def te_tmax_daily_1960_2023():
+    basedir = "/home/tcarrasco/result/data/TE/"
+    filename = "tmax_diaria_temuco_CR2_explorador.csv"
+    filepath = join(basedir, filename)
+    df = pd.read_csv(filepath, delimiter=",", decimal=".",
+                     parse_dates={'time': ['agno', ' mes', ' dia']})
+    df = df.rename({' valor': 'tmax'}, axis='columns')
+    df = df.set_index('time')
+    da = df['tmax'].to_xarray()
+    da = da.sel(time=slice('1960-01-01', None))
+    month = da.time.dt.month
+    day = da.time.dt.day
+    da = xr.where((month == 2) & (day == 29), np.nan, da)
+    da = da.dropna(dim="time", how="any")
+    return da
+
+
+def la_tmax_daily_1960_2023():
+    basedir = "/home/tcarrasco/result/data/LA/"
+    filename = "tmax_diaria_los_angeles_CR2_explorador.csv"
+    filepath = join(basedir, filename)
+    df = pd.read_csv(filepath, delimiter=",", decimal=".",
+                     parse_dates={'time': ['agno', ' mes', ' dia']})
+    df = df.rename({' valor': 'tmax'}, axis='columns')
+    df = df.set_index('time')
+    da = df['tmax'].to_xarray()
+    da = da.sel(time=slice('1960-01-01', None))
+    month = da.time.dt.month
+    day = da.time.dt.day
+    da = xr.where((month == 2) & (day == 29), np.nan, da)
+    da = da.dropna(dim="time", how="any")
+    return da
+
+
+def tch_wind_2023():
+    basedir = "/home/tcarrasco/result/data/TCH/"
+    filename = "termas_chillan_viento_maximo_2023.csv"
+    filepath = join(basedir, filename)
+    df = pd.read_csv(filepath, delimiter=",", decimal=".",
+                     parse_dates={'time': ['Anho', 'Mes', 'Dia']})
+    df = df.rename({'Fuerza Viento Max (Kt)': 'ff'}, axis='columns')
+    df = df.set_index('time')
+    da = df['ff'].to_xarray()
+    da = da.sel(time=slice('1960-01-01', None))
+    month = da.time.dt.month
+    day = da.time.dt.day
+    da = xr.where((month == 2) & (day == 29), np.nan, da)
+    da = da.dropna(dim="time", how="any")
+    return da
+
+
 def select_station(stn):
     available = {}
     available['qn'] = (qn_tmax_daily_1911_2023, '1911', '2023')
     available['cu'] = (cu_tmax_daily_1958_2023, '1958', '2023')
+    available['ch'] = (cu_tmax_daily_1958_2023, '1960', '2023')
     return available[stn]
 
 
@@ -65,3 +134,16 @@ def tmax_3d_DJF(stn):
     # da = da.coarsen(time=88).max()
     da = da.resample(time='AS-Dec').max(skipna=True)
     return da
+
+
+def fill_na(data_array, start_date='2017-01-01', end_date='2017-02-28'):
+    dr = pd.date_range(start_date, end_date, freq='1D')
+    da_ans = xr.DataArray(np.zeros((dr.size,))*np.nan,
+                          coords=[dr],
+                          dims=['time'])
+    for i, date in enumerate(dr):
+        try:
+            da_ans[i] = data_array.sel(time=date)
+        except Exception as e:
+            continue
+    return da_ans

@@ -1,5 +1,7 @@
 import numpy as np
+import xarray as xr
 from scipy.optimize import fmin
+from scipy.stats import linregress
 from scipy.stats import norm
 from scipy.stats import genextreme as gev
 from scipy.stats import gumbel_r as gum
@@ -204,3 +206,45 @@ def return_periods(z, method='up'):
             tail[i] = np.sum(z >= x)/n
         tau[i] = 1/tail[i]
     return u, tau
+
+# time-lat-lon
+
+
+def linear_trend_3D(data_array):
+
+    time = data_array.time
+    lat = data_array.lat
+    lon = data_array.lon
+
+    data = data_array.values
+    x = time.dt.year.values
+
+    slope = np.zeros((lat.size, lon.size))*np.nan
+    inter = np.zeros((lat.size, lon.size))*np.nan
+    rvals = np.zeros((lat.size, lon.size))*np.nan
+    pvals = np.zeros((lat.size, lon.size))*np.nan
+
+    for i in range(lat.size):
+        for j in range(lon.size):
+            y = data[:, i, j]
+
+            try:
+                res = linregress(x, y)
+            except Exception as e:
+                continue
+
+            slope[i, j] = res.slope
+            inter[i, j] = res.intercept
+            rvals[i, j] = res.rvalue
+            pvals[i, j] = res.pvalue
+
+    da_slope = xr.DataArray(slope, coords=[lat, lon], dims=['lat', 'lon'])
+    da_inter = xr.DataArray(inter, coords=[lat, lon], dims=['lat', 'lon'])
+    da_rvals = xr.DataArray(rvals, coords=[lat, lon], dims=['lat', 'lon'])
+    da_pvals = xr.DataArray(pvals, coords=[lat, lon], dims=['lat', 'lon'])
+
+    dsout = xr.Dataset({'slope': da_slope,
+                        'intercept': da_inter,
+                        'rvalue': da_rvals,
+                        'pvalue': da_pvals})
+    return dsout

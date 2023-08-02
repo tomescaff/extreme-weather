@@ -35,6 +35,7 @@ mean_plus_1std = mean + std
 mean_plus_2std = mean + 2*std
 val_tau_10 = norm.isf(1/10, mu, sigma)
 val_tau_100 = norm.isf(1/100, mu, sigma)
+val_tau_1000 = norm.isf(1/1000, mu, sigma)
 
 # CI of the mean
 nboot = 1000
@@ -67,33 +68,38 @@ for font in font_manager.findSystemFonts(font_dir):
 
 plt.rcParams['font.family'] = 'arial'
 plt.rcParams['font.size'] = 10
-plt.rcParams['axes.spines.top'] = False
-plt.rcParams['axes.spines.right'] = False
+# plt.rcParams['axes.spines.top'] = False
+# plt.rcParams['axes.spines.right'] = False
 
 fig = plt.figure(figsize=(8, 5))
-plt.fill_between(xx, mean_inf, mean_sup, color='#FF2E63', alpha=0.15)
+plt.fill_between(xx, mean_inf, mean_sup, color='#FFDEDE')
 # plt.scatter(x_prev, y_prev, s=20, marker='o',
 #             edgecolor='#222831', facecolor='#EEEEEE', alpha=0.8)
 plt.scatter(x, y, s=20, marker='o', edgecolor='#222831',
             facecolor='#00ADB5', alpha=0.8)
 
-for year in [2017, 2019, 2023]:
+for year in [2017, 2023]:
     plt.text(x.sel(time=f'{year-1}')+0.01,
              y.sel(time=f'{year}'), f'{year}', fontsize=7)
 
-plt.plot(x, mean, c='#FF2E63', lw=1.5, label='Mean')
-plt.plot(x, mean_plus_1std, c='#FF2E63', lw=0.5)
-plt.plot(x, mean_plus_2std, c='#FF2E63', lw=0.5)
-plt.plot(x, val_tau_100, c='#FF9A00', lw=1.5, label='100-year event')
-plt.plot(x, val_tau_10, c='#FF9A00', lw=1.5, ls='--', label='10-year event')
+plt.text(x.sel(time=f'{2019-1}')-0.03,
+         y.sel(time=f'{2019}')-0.1, f'{2019}', fontsize=7)
+
+plt.plot(x, mean, c='#FF2E63', lw=2.0, label='Mean')
+plt.plot(x, mean_plus_1std, c='#FF2E63', lw=0.5, label='Mean + Std')
+# plt.plot(x, mean_plus_2std, c='#FF2E63', lw=0.5)
+plt.plot(x, val_tau_10, c='#FF9A00', lw=1.5, ls='-.', label='10-year event')
+plt.plot(x, val_tau_100, c='#FF9A00', lw=1.5, ls='--', label='100-year event')
+plt.plot(x, val_tau_1000, c='#FF9A00', lw=1.5, ls='dotted',
+         label='1000-year event')
 plt.ylim([35, 43])
-plt.xlim([0.4, 1.25])
+plt.xlim([x.min()-0.01, x.max()+0.01])
 plt.grid(color='grey', lw=0.4, ls='--')
 ax = plt.gca()
-ax.tick_params(direction="in")
+# ax.tick_params(direction="in")
 plt.xlabel('GMST anomaly (smoothed) (ºC)')
-plt.ylabel('Tmax [DJF, 30-40ºS] (ºC)')
-plt.legend(loc='upper center', ncol=3)
+plt.ylabel('Highest Tx (ºC)')
+plt.legend(loc='lower right', ncol=2, facecolor='white', framealpha=1)
 plt.tight_layout()
 plt.savefig('/home/tcarrasco/result/images/png/CR2MET_tmax_1d_GMST_mean.png',
             dpi=300)

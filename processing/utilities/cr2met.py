@@ -66,11 +66,47 @@ def daily_tmax(year, month, day):
     bdir_ERA5 += 'CR2MET_out/txn/v2.5/v2.5_R1_day/'
     fn_ERA5 = f'CR2MET_tmin_tmax_v2.5_R1_day_{year}_{month}_005deg.nc'
     fn_ERA5T = f'CR2MET_tmin_tmax_v2.5_NRT_day_{year}_{month}_005deg.nc'
-    if (float(year) == 2022 and float(month) == 11) or (float(year) >= 2023):
+    if (float(year) == 2022 and float(month) >= 11) or (float(year) >= 2023):
         filepath = bdir_ERA5T + fn_ERA5T
     else:
         filepath = bdir_ERA5 + fn_ERA5
     da = xr.open_dataset(filepath)['tmax']
+    mask = clmask()
+    da = da*mask
+    da = da.sel(time=f'{year}-{month}-{day}')
+    return da
+
+
+def daily_tmin(year, month, day):
+    bdir_ERA5T = '/mnt/cirrus/cr2met_prodution/data_folder_cr2met_ERA5T_v2_5/'
+    bdir_ERA5T += 'CR2MET_out/txn/v2.5/v2.5_NRT_day/'
+    bdir_ERA5 = '/mnt/cirrus/cr2met_prodution/data_folder_cr2met_v2_5/'
+    bdir_ERA5 += 'CR2MET_out/txn/v2.5/v2.5_R1_day/'
+    fn_ERA5 = f'CR2MET_tmin_tmax_v2.5_R1_day_{year}_{month}_005deg.nc'
+    fn_ERA5T = f'CR2MET_tmin_tmax_v2.5_NRT_day_{year}_{month}_005deg.nc'
+    if (float(year) == 2022 and float(month) >= 11) or (float(year) >= 2023):
+        filepath = bdir_ERA5T + fn_ERA5T
+    else:
+        filepath = bdir_ERA5 + fn_ERA5
+    da = xr.open_dataset(filepath)['tmin']
+    mask = clmask()
+    da = da*mask
+    da = da.sel(time=f'{year}-{month}-{day}')
+    return da
+
+
+def daily_pr(year, month, day):
+    bdir_ERA5T = '/mnt/cirrus/cr2met_prodution/data_folder_cr2met_ERA5T_v2_5/'
+    bdir_ERA5T += 'CR2MET_out/pr/v2.5/v2.5_NRT_day/'
+    bdir_ERA5 = '/mnt/cirrus/cr2met_prodution/data_folder_cr2met_v2_5/'
+    bdir_ERA5 += 'CR2MET_out/pr/v2.5/v2.5_R1_day/'
+    fn_ERA5 = f'CR2MET_pr_v2.5_R1_day_{year}_{month}_005deg.nc'
+    fn_ERA5T = f'CR2MET_pr_v2.5_NRT_day_{year}_{month}_005deg.nc'
+    if (float(year) == 2022 and float(month) >= 11) or (float(year) >= 2023):
+        filepath = bdir_ERA5T + fn_ERA5T
+    else:
+        filepath = bdir_ERA5 + fn_ERA5
+    da = xr.open_dataset(filepath)['pr']
     mask = clmask()
     da = da*mask
     da = da.sel(time=f'{year}-{month}-{day}')
@@ -120,6 +156,14 @@ def nday_djf(threshold=35.0):
         data[i] = da.where(da >= threshold, drop=True).size
     ans = xr.DataArray(data, coords=[time], dims='time')
     return ans
+
+
+def daily_spamax_djf(year='2017'):
+    basedir = '/home/tcarrasco/result/data/CR2MET/nday/daily_spamax/'
+    filename = 'CR2MET_tmax_v2.5_DJF_1day_'+year+'_005deg.nc'
+    filepath = basedir + filename
+    da = xr.open_dataset(filepath)['tmax']
+    return da
 
 
 def boxplot_tmax_1d_djf_30_40S():
